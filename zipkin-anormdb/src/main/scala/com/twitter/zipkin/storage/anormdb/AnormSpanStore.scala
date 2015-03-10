@@ -241,19 +241,19 @@ class AnormSpanStore(
     getSpansByTraceIds(Seq(traceId)).map(_.head)
 
   private[this] val idsByNameSql = SQL("""
-    |SELECT trace_id, MAX(a_timestamp)
+    |SELECT trace_id, MAX(a_timestamp) ts
     |FROM zipkin_annotations
     |WHERE service_name = {service_name}
     |  AND (span_name = {span_name} OR {span_name} = '')
     |  AND a_timestamp < {end_ts}
     |GROUP BY trace_id
-    |ORDER BY a_timestamp DESC
+    |ORDER BY ts DESC
     |LIMIT {limit}
   """.stripMargin)
 
   private[this] val idsByNameResults = (
     long("trace_id") ~
-    long("MAX(a_timestamp)")
+    long("ts")
   ) map { case a~b => IndexedTraceId(a, b) }
 
   def getTraceIdsByName(
@@ -291,19 +291,19 @@ class AnormSpanStore(
   ) map { case a~b => IndexedTraceId(a, b) }
 
   private[this] val byAnnSql = SQL("""
-    |SELECT trace_id, MAX(a_timestamp)
+    |SELECT trace_id, MAX(a_timestamp) ts
     |FROM zipkin_annotations
     |WHERE service_name = {service_name}
     |  AND value = {annotation}
     |  AND a_timestamp < {end_ts}
     |GROUP BY trace_id
-    |ORDER BY a_timestamp DESC
+    |ORDER BY ts DESC
     |LIMIT {limit}
   """.stripMargin)
 
   private[this] val byAnnResult = (
     long("trace_id") ~
-    long("MAX(a_timestamp)")
+    long("ts")
   ) map { case a~b => IndexedTraceId(a, b) }
 
   def getTraceIdsByAnnotation(

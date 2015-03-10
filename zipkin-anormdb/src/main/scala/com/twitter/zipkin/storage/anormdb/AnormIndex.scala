@@ -59,20 +59,20 @@ case class AnormIndex(db: DB, openCon: Option[Connection] = None) extends Index 
   def getTraceIdsByName(serviceName: String, spanName: Option[String],
                         endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = inNewThread {
     val result:List[(Long, Long)] = SQL(
-      """SELECT trace_id, MAX(a_timestamp)
+      """SELECT trace_id, MAX(a_timestamp) ts
         |FROM zipkin_annotations
         |WHERE service_name = {service_name}
         |  AND (span_name = {span_name} OR {span_name} = '')
         |  AND a_timestamp < {end_ts}
         |GROUP BY trace_id
-        |ORDER BY a_timestamp DESC
+        |ORDER BY ts DESC
         |LIMIT {limit}
       """.stripMargin)
       .on("service_name" -> serviceName)
       .on("span_name" -> (if (spanName.isEmpty) "" else spanName.get))
       .on("end_ts" -> endTs)
       .on("limit" -> limit)
-      .as((long("trace_id") ~ long("MAX(a_timestamp)") map flatten) *)
+      .as((long("trace_id") ~ long("ts") map flatten) *)
     result map { case (tId, ts) =>
       IndexedTraceId(traceId = tId, timestamp = ts)
     }
@@ -117,20 +117,20 @@ case class AnormIndex(db: DB, openCon: Option[Connection] = None) extends Index 
         // Normal annotations
         case None => {
           SQL(
-            """SELECT trace_id, MAX(a_timestamp)
+            """SELECT trace_id, MAX(a_timestamp) ts
               |FROM zipkin_annotations
               |WHERE service_name = {service_name}
               |  AND value = {annotation}
               |  AND a_timestamp < {end_ts}
               |GROUP BY trace_id
-              |ORDER BY a_timestamp DESC
+              |ORDER BY ts DESC
               |LIMIT {limit}
             """.stripMargin)
             .on("service_name" -> serviceName)
             .on("annotation" -> annotation)
             .on("end_ts" -> endTs)
             .on("limit" -> limit)
-            .as((long("trace_id") ~ long("MAX(a_timestamp)") map flatten) *)
+            .as((long("trace_id") ~ long("ts") map flatten) *)
         }
       }
       result map { case (tId, ts) =>
