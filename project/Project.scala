@@ -270,7 +270,8 @@ object Zipkin extends Build {
   ).settings(
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "anorm" % "2.3.7",
-      anormDriverDependencies("sqlite-persistent")
+      anormDriverDependencies("sqlite-persistent"),
+      anormDriverDependencies("postgresql")
     ) ++ scalaTestDeps,
 
     /* Add configs to resource path for ConfigSpec */
