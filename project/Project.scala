@@ -156,7 +156,8 @@ object Zipkin extends Build {
         util("core"),
         zk("client"),
         algebird("core"),
-        "com.twitter" %% "ostrich" % ostrichVersion
+        "com.twitter" %% "ostrich" % ostrichVersion,
+        "org.postgresql" % "postgresql" % "9.4-1201-jdbc41"
       ) ++ scalaTestDeps
     )
 
