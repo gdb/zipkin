@@ -94,7 +94,7 @@ case class AnormIndex(db: DB, openCon: Option[Connection] = None) extends Index 
         // Binary annotations
         case Some(bytes) => {
           SQL(
-            """SELECT zba.trace_id, s.created_ts
+            """SELECT zba.trace_id, MAX(s.created_ts) created_ts
             |FROM zipkin_binary_annotations AS zba
             |LEFT JOIN zipkin_spans AS s
             |  ON zba.trace_id = s.trace_id
@@ -104,7 +104,7 @@ case class AnormIndex(db: DB, openCon: Option[Connection] = None) extends Index 
             |  AND s.created_ts < {end_ts}
             |  AND s.created_ts IS NOT NULL
             |GROUP BY zba.trace_id
-            |ORDER BY s.created_ts DESC
+            |ORDER BY created_ts DESC
             |LIMIT {limit}
           """.stripMargin)
             .on("service_name" -> serviceName)

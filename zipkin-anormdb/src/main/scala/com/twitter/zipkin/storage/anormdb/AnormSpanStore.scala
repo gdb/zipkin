@@ -271,7 +271,7 @@ class AnormSpanStore(
   }
 
   private[this] val byAnnValSql = SQL("""
-    |SELECT zba.trace_id, s.created_ts
+    |SELECT zba.trace_id, MAX(s.created_ts) created_ts
     |FROM zipkin_binary_annotations AS zba
     |LEFT JOIN zipkin_spans AS s
     |  ON zba.trace_id = s.trace_id
@@ -281,7 +281,7 @@ class AnormSpanStore(
     |  AND s.created_ts < {end_ts}
     |  AND s.created_ts IS NOT NULL
     |GROUP BY zba.trace_id
-    |ORDER BY s.created_ts DESC
+    |ORDER BY created_ts DESC
     |LIMIT {limit}
   """.stripMargin)
 
